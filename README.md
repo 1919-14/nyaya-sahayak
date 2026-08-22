@@ -176,7 +176,7 @@ Open your browser and navigate to:
 Since FastAPI is configured to serve the static frontend directly at `/`, you can host the entire application on **Render (Free Tier)** with a single Web Service:
 
 1. Create a **New Web Service** on Render connected to your GitHub repository.
-2. **Build Command**: `pip install -r requirements.txt && python ingest/download_and_build.py --build-only`
+2. **Build Command**: `bash build.sh`
 3. **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 4. Add `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`, and `TAVILY_API_KEY` under **Environment Variables**.
 
