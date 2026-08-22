@@ -495,7 +495,7 @@
 
 <script>
 /* ============================== Config ============================== */
-const API = "http://localhost:8000";
+const API = window.location.origin;
 let sessionId = localStorage.getItem("nyaya_session") || null;
 let currentLang = localStorage.getItem("nyaya_lang") || "en";
 let isWebSearchOn = false;
