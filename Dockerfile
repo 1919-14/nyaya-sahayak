@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel \
 COPY . .
 
 # Build vector database offline ingest
-RUN python ingest/download_and_build.py --build-only
+RUN python ingest/download_and_build.py 
 
 # Hugging Face Spaces default port
 EXPOSE 7860
