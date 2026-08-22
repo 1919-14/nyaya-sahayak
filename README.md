@@ -13,7 +13,7 @@
 
 | Requirement | Details / Link |
 | :--- | :--- |
-| 🌐 **Live / Hosted Prototype Link** | [http://localhost:8000](http://localhost:8000) *(Local)* / [https://nyaya-sahayak.onrender.com](https://nyaya-sahayak.onrender.com) *(Hosted)* |
+| 🌐 **Live / Hosted Prototype Link** | [https://nyaya-sahayak-zsob.onrender.com/](https://nyaya-sahayak-zsob.onrender.com/) *(Live Deployment)* |
 | 📁 **GitHub Repository** | [https://github.com/1919-14/nyaya-sahayak](https://github.com/1919-14/nyaya-sahayak) |
 | 🎥 **Demo Video (MANDATORY)** | **[Click Here to Watch Demo Video (Max 10 Mins)](https://github.com/1919-14/nyaya-sahayak)** |
 
