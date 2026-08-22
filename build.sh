@@ -5,6 +5,7 @@ set -e
 # Set writable temporary directories for Rust/Cargo/Maturin on Render's read-only builder
 export CARGO_HOME=/tmp/cargo
 export RUSTUP_HOME=/tmp/rustup
+export ANONYMIZED_TELEMETRY=False
 mkdir -p /tmp/cargo /tmp/rustup
 
 # Upgrade pip and install pre-compiled binary wheels
