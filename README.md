@@ -68,17 +68,34 @@ flowchart TD
 
 ---
 
-## ✨ Core Features & Technical Highlights
+## 🛡️ Anti-Hallucination & Legal Compliance Guardrails
 
-* 🤖 **Streaming Token Generation**: High-speed, real-time response rendering over Server-Sent Events (SSE).
-* 🌐 **Explicit & Fallback Web Search (`🌐 Web Search`)**: User-controlled toggle for explicit live web retrieval via Tavily AI Search.
-* 💡 **Clickable Follow-Up Suggestions**: Automatically extracts *"You might also want to know / ask:"* questions and presents them as interactive, tappable pill buttons above citations.
-* 🛡️ **Source-Tier Color Coding**:
-  * 🟢 **Verified Legal DB**: Clauses retrieved from ingested government Acts (RTI 2005, Consumer Protection 2019, Code on Wages 2019).
-  * 🔵 **Web Search Result**: Real-time supplementary web results with clickable direct links.
-  * 🔴 **Unconfirmed**: Claims extracted from user uploads that have not been independently cross-checked.
-* 📝 **Automated Legal Document Generator**: Drafts ready-to-file RTI Applications and Formal Complaints prepopulated with applicant details and session facts.
-* 🗣️ **Bilingual & Voice Input Support**: Full English and Devanagari Hindi (`हिं`) interface with browser-native Web Speech API voice input.
+Nyaya Sahayak incorporates multi-layered technical guardrails to prevent model hallucinations and maintain strict legal compliance:
+
+### 1. Anti-Hallucination Mechanisms
+* **Strict Grounded Generation**: The system prompt forces the LLM to act purely as a grounded information synthesizer. Factual claims must be directly traceable to indexed source chunks and cited inline as `[1]`, `[2]`.
+* **Confidence-Gated Escalation Thresholds**: Vector similarity scores are evaluated on Chroma cosine distances (0–1). If similarity is below `0.45`, the system avoids guessing and either triggers web fallback or asks a clarifying question.
+* **Source-Tier Conflict Resolution**: When web search results conflict with verified local legal database chunks, the prompt forces the model to prioritize verified legal data and explicitly report discrepancies.
+* **Document Verification Protocol (`cross_check_uploaded_law`)**: User-uploaded legal text ("This is the law") is cross-checked against vetted vector DB entries using an LLM fact-checker before being accepted into conversation context. Unverified claims are explicitly flagged.
+
+### 2. Legal & Regulatory Compliance Guardrails
+* **Role Boundary & Disclaimer Enforcement**: Prominently displays disclaimers (*"Consultation Room — Not a Lawyer"* and *"Not legal advice"*) across the letterhead and chat composer.
+* **Non-Binding Guidance**: Operates strictly as a civic awareness, information lookup, and document drafting assistant—never issuing binding legal counsel or pretending to act as a licensed practitioner.
+* **Plain Language & Accessibility**: Answers are re-phrased into everyday vocabulary without confusing legalese, with an optional "Explain Simpler" feature for low reading levels.
+
+---
+
+## ✨ All Core Features & Technical Highlights
+
+* 🤖 **Streaming Token Generation**: Real-time token streaming over Server-Sent Events (SSE).
+* 🌐 **Interactive Web Search Toggle (`🌐 Web Search`)**: User-controlled toggle button in the input bar to explicitly force live web retrieval via Tavily AI Search.
+* 💡 **Clickable Follow-Up Suggestions**: Automatically extracts follow-up questions and displays them as interactive pill buttons under the heading **"You might also want to know / ask:"** placed above citation badges.
+* 🛡️ **Source-Tier Color Badging**:
+  * 🟢 **Verified Legal DB**: Clauses retrieved from ingested government Acts (RTI Act 2005, Consumer Protection Act 2019, Code on Wages 2019).
+  * 🔵 **Web Search Result**: Real-time supplementary web results with clickable direct URL links.
+  * 🔴 **Unconfirmed**: Claims extracted from user uploads that have not been independently verified.
+* 📝 **Automated Legal Document Generator**: Auto-drafts ready-to-file RTI Applications and Formal Complaints prepopulated with applicant details and session facts.
+* 🗣️ **Bilingual & Voice Input Support**: Full English and Devanagari Hindi (`हिं`) toggle with browser-native Web Speech API voice input.
 * 🔍 **"Explain Simpler" Mode**: Lowers reading difficulty for complex legal answers while retaining original factual citations.
 
 ---
@@ -87,7 +104,7 @@ flowchart TD
 
 * **Backend**: Python 3.11, FastAPI, Uvicorn, SQLite
 * **RAG & Embeddings**: ChromaDB, Sentence-Transformers (`all-MiniLM-L6-v2`)
-* **LLM Engine**: Groq / OpenAI-compatible Chat Completions API
+* **LLM Engine**: Groq / OpenAI-compatible Chat Completions API (`llama-3.3-70b-versatile`)
 * **Web Search API**: Tavily Search API
 * **Frontend**: Vanilla HTML5, Modern CSS3 (Glassmorphism & CSS Variables), ES6 JavaScript
 
