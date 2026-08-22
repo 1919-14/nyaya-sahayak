@@ -12,4 +12,4 @@ pip install --upgrade pip setuptools wheel
 pip install --prefer-binary -r requirements.txt
 
 # Build vector database from ingested raw sources
-python ingest/download_and_build.py --build-only
+python ingest/download_and_build.py
