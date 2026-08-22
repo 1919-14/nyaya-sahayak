@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nyaya Sahayak — AI Civic & Legal Empowerment Assistant</title>
+<style>
+  :root {
+    --ink: #1c2a44;
+    --ink-soft: #33456b;
+    --paper: #f6f3ec;
+    --paper-line: #d8d2c2;
+    --stamp: #9c2b21;
+    --stamp-soft: #f4e2df;
+    --seal-green: #2f6b4f;
+    --seal-green-soft: #dfeee6;
+    --muted: #6b6456;
+    --mono: 'IBM Plex Mono', 'SF Mono', 'Courier New', monospace;
+    --serif: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 480px; margin: 0 auto; padding: 0 20px 60px; }
+
+  /* ---------- Header / letterhead strip ---------- */
+  .letterhead {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--paper-line);
+  }
+  .letterhead .dot { color: var(--stamp); }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: 40px 0 20px; position: relative; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--stamp);
+    margin-bottom: 14px;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-size: 40px;
+    line-height: 1.08;
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+  h1 em { font-style: italic; color: var(--ink-soft); }
+  .sub {
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin: 0 0 26px;
+    max-width: 42ch;
+  }
+
+  /* stamp graphic */
+  .stamp-wrap { display: flex; justify-content: center; margin: 26px 0 10px; }
+  .stamp {
+    width: 132px; height: 132px;
+    border: 3px solid var(--stamp);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transform: rotate(-9deg);
+    position: relative;
+    color: var(--stamp);
+  }
+  .stamp::before {
+    content: "";
+    position: absolute; inset: 8px;
+    border: 1px solid var(--stamp);
+    border-radius: 50%;
+  }
+  .stamp-text {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-align: center;
+    line-height: 1.6;
+  }
+
+  .cta-row { display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap; }
+  .btn {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    letter-spacing: 0.04em;
+    padding: 12px 18px;
+    border-radius: 3px;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary { background: var(--ink); color: var(--paper); }
+  .btn-secondary { border: 1px solid var(--ink); color: var(--ink); }
+
+  /* ---------- Section shared ---------- */
+  section { padding: 38px 0; border-top: 1px solid var(--paper-line); }
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  h2 {
+    font-family: var(--serif);
+    font-size: 24px;
+    margin: 0 0 14px;
+    line-height: 1.2;
+  }
+  p.body-text { font-size: 14.5px; line-height: 1.6; color: var(--ink-soft); margin: 0 0 10px; }
+
+  /* ---------- Problem cards ---------- */
+  .pain-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+  .pain-item {
+    display: flex; gap: 12px;
+    padding: 14px 14px;
+    background: white;
+    border: 1px solid var(--paper-line);
+    border-radius: 6px;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+  .pain-item .mark { color: var(--stamp); font-family: var(--mono); font-size: 13px; flex-shrink: 0; }
+
+  /* ---------- Flow steps (real sequence, numbered) ---------- */
+  .flow { margin-top: 18px; }
+  .flow-step {
+    display: flex; gap: 14px;
+    padding: 16px 0;
+    border-bottom: 1px dashed var(--paper-line);
+  }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--stamp);
+    border: 1px solid var(--stamp);
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .flow-body h3 { font-size: 14.5px; margin: 2px 0 4px; font-weight: 600; }
+  .flow-body p { font-size: 13px; color: var(--ink-soft); margin: 0; line-height: 1.5; }
+
+  /* ---------- Feature grid ---------- */
+  .feature-grid { display: flex; flex-direction: column; gap: 14px; margin-top: 16px; }
+  .feature {
+    background: white;
+    border: 1px solid var(--paper-line);
+    border-radius: 6px;
+    padding: 16px;
+  }
+  .feature h3 { font-size: 14px; margin: 0 0 6px; font-weight: 600; }
+  .feature p { font-size: 13px; color: var(--ink-soft); margin: 0; line-height: 1.5; }
+  .tier-tags { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .tier-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+  .tier-tag.verified { background: var(--seal-green-soft); color: var(--seal-green); }
+  .tier-tag.web { background: #dbeafe; color: #1e3a8a; }
+  .tier-tag.unconfirmed { background: var(--stamp-soft); color: var(--stamp); }
+
+  /* ---------- Domain chips ---------- */
+  .domain-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .chip {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    padding: 7px 12px;
+    border: 1px solid var(--ink);
+    border-radius: 999px;
+    color: var(--ink);
+  }
+
+  /* ---------- Stack strip ---------- */
+  .stack-strip { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .stack-item {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    padding: 5px 10px;
+    background: white;
+    border: 1px solid var(--paper-line);
+    border-radius: 3px;
+  }
+
+  /* ---------- Footer ---------- */
+  footer {
+    padding: 30px 0 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.7;
+  }
+  footer .stamp-mini {
+    display: inline-block;
+    border: 1px solid var(--stamp);
+    color: var(--stamp);
+    border-radius: 999px;
+    padding: 3px 10px;
+    margin-bottom: 10px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="letterhead">
+    <span>REF: PS3 <span class="dot">·</span> CIVIC &amp; LEGAL EMPOWERMENT</span>
+    <span>IIIT-A 2026</span>
+  </div>
+
+  <div class="hero">
+    <div class="eyebrow">Application Assistant — Not a Lawyer</div>
+    <h1>Bureaucracy, <em>answered</em>.<br>Rights, <em>drafted</em>.</h1>
+    <p class="sub">Nyaya Sahayak turns "I don't understand my situation" into a cited answer and a ready-to-file document — RTI applications, complaints, and more — grounded in real law, not guesses.</p>
+
+    <div class="stamp-wrap">
+      <div class="stamp">
+        <div class="stamp-text">CLAIM<br>RESOLVED</div>
+      </div>
+    </div>
+
+    <div class="cta-row">
+      <a class="btn btn-primary" href="../frontend/index.html">Launch the assistant &rarr;</a>
+      <a class="btn btn-secondary" href="#how">See how it works</a>
+    </div>
+  </div>
+
+  <section>
+    <div class="section-label">The Problem</div>
+    <h2>Rights that go unused, buried in paperwork.</h2>
+    <p class="body-text">Consumer protections, tenant rights, RTI access, welfare eligibility — citizens are entitled to them, but navigating the language and process is intimidating and scattered across PDFs, portals, and notices no one designed for a specific personal problem.</p>
+    <div class="pain-list">
+      <div class="pain-item"><span class="mark">＋</span>Legal text exists, but nobody connects it to your specific situation.</div>
+      <div class="pain-item"><span class="mark">＋</span>Generic chatbots answer once and repeat themselves on follow-up.</div>
+      <div class="pain-item"><span class="mark">＋</span>Knowing your rights isn't the same as having the document in hand.</div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="section-label">How It Works</div>
+    <h2>From question to filed document.</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-body">
+          <h3>Ask, in your own words</h3>
+          <p>No legal vocabulary required — describe the situation as you'd tell a friend.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-body">
+          <h3>Cross-questioned, not guessed at</h3>
+          <p>Low-confidence answers trigger a short clarifying question with tap-to-answer options, instead of a fabricated response.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-body">
+          <h3>Grounded, cited answer</h3>
+          <p>Every claim traces to a clause — from our verified database, or a labelled live web fallback when it isn't there.</p>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-body">
+          <h3>A document, not just advice</h3>
+          <p>RTI application or complaint letter, pre-filled from the conversation and ready to send.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label">What Makes It Different</div>
+    <h2>Built to distrust itself first.</h2>
+    <div class="feature-grid">
+      <div class="feature">
+        <h3>Session memory that actually resolves "tell me more"</h3>
+        <p>Follow-ups are rewritten against chat history before retrieval, so the second answer isn't the first one repeated.</p>
+      </div>
+      <div class="feature">
+        <h3>Every claim is source-tiered</h3>
+        <p>Nothing is presented as equally certain.</p>
+        <div class="tier-tags">
+          <span class="tier-tag verified">verified</span>
+          <span class="tier-tag web">web-sourced</span>
+          <span class="tier-tag unconfirmed">unconfirmed</span>
+        </div>
+      </div>
+      <div class="feature">
+        <h3>Your documents are evidence, not gospel</h3>
+        <p>Uploaded proof is extracted as facts. Uploaded "law" is cross-checked against verified sources before it's trusted.</p>
+      </div>
+      <div class="feature">
+        <h3>Ask in English or Hindi — by typing or by voice</h3>
+        <p>A real language toggle, not a cosmetic one — retrieval, generation, and drafting all respond in the language you pick, and the mic button transcribes speech directly into the composer.</p>
+      </div>
+      <div class="feature">
+        <h3>"Explain simpler," on demand</h3>
+        <p>Any answer can be re-expressed at a lower reading level with one tap — reusing the same cited sources, no new lookup, so the facts never drift.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label">Domain Coverage</div>
+    <h2>One offline pipeline, four legal domains.</h2>
+    <p class="body-text">The ingestion investment isn't locked to a single narrow topic — RTI applies as the universal escalation path across all of them.</p>
+    <div class="domain-chips">
+      <span class="chip">Right to Information</span>
+      <span class="chip">Consumer Protection</span>
+      <span class="chip">Labour &amp; Workplace</span>
+      <span class="chip">Welfare Schemes</span>
+    </div>
+  </section>
+
+  <section id="stack">
+    <div class="section-label">Under the Hood</div>
+    <h2>No live scraping on stage.</h2>
+    <p class="body-text">Ingestion runs once, offline. The demo only ever queries a local vector store, with a structured web fallback for gaps — nothing fragile happens live.</p>
+    <div class="stack-strip">
+      <span class="stack-item">FastAPI</span>
+      <span class="stack-item">ChromaDB</span>
+      <span class="stack-item">Groq / OpenAI-compatible LLM</span>
+      <span class="stack-item">Sentence-Transformers</span>
+      <span class="stack-item">Tavily</span>
+    </div>
+  </section>
+
+  <section id="launch" style="text-align:center;">
+    <div class="section-label">Ready When You Are</div>
+    <h2>Bring your question. Leave with a document.</h2>
+    <p class="body-text">The consultation room is live — English or Hindi, typed or spoken.</p>
+    <div class="cta-row" style="justify-content:center; margin-top:22px;">
+      <a class="btn btn-primary" href="../frontend/index.html">Launch the assistant &rarr;</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="stamp-mini">FILED FOR HACKATHON REVIEW</div><br>
+    Nyaya Sahayak — Problem Statement 3<br>
+    Built for the IIIT Allahabad Hackathon, 2026
+  </footer>
+
+</div>
+</body>
+</html>

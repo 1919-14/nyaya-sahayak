@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nyaya Sahayak — Consultation Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.5/purify.min.js"></script>
+<style>
+  :root {
+    --ink: #1c2a44;
+    --ink-soft: #33456b;
+    --paper: #f6f3ec;
+    --paper-raised: #ffffff;
+    --paper-line: #d8d2c2;
+    --stamp: #9c2b21;
+    --stamp-soft: #f4e2df;
+    --seal-green: #2f6b4f;
+    --seal-green-soft: #dfeee6;
+    --gold: #a9822f;
+    --gold-soft: #f2e9d3;
+    --muted: #6b6456;
+    --mono: 'IBM Plex Mono', 'SF Mono', 'Courier New', monospace;
+    --serif: 'Source Serif 4', Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(28,42,68,0.05) 1px, transparent 0);
+    background-size: 22px 22px;
+    color: var(--ink);
+    font-family: var(--sans);
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---------------- Letterhead / top bar ---------------- */
+  .letterhead {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 22px;
+    background: var(--ink);
+    color: var(--paper);
+    border-bottom: 3px solid var(--gold);
+    flex-shrink: 0;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand .seal {
+    width: 38px; height: 38px; border-radius: 50%;
+    border: 2px solid var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); font-weight: 700; font-size: 14px;
+    color: var(--gold); flex-shrink: 0;
+  }
+  .brand .name { font-family: var(--serif); font-size: 19px; font-weight: 700; line-height: 1.1; }
+  .brand .tagline { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; color: #c8cede; text-transform: uppercase; }
+
+  .letterhead-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  .status-pill {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.04em;
+    padding: 5px 10px; border-radius: 999px;
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.08); color: #dfe3ee;
+  }
+  .status-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: #9aa4bb; }
+  .status-pill.ok .dot { background: #4fd18b; box-shadow: 0 0 6px #4fd18b; }
+  .status-pill.bad .dot { background: #e9707a; box-shadow: 0 0 6px #e9707a; }
+
+  .lang-toggle {
+    display: flex; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.03em;
+    border: 1px solid rgba(255,255,255,0.35); border-radius: 999px; overflow: hidden;
+  }
+  .lang-toggle button {
+    background: transparent; border: none; color: #dfe3ee;
+    padding: 6px 12px; cursor: pointer; font-family: inherit; font-size: inherit;
+  }
+  .lang-toggle button.active { background: var(--gold); color: var(--ink); font-weight: 700; }
+
+  .btn-newmatter {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.03em;
+    padding: 7px 12px; border-radius: 4px; cursor: pointer;
+    background: transparent; border: 1px solid rgba(255,255,255,0.35); color: #dfe3ee;
+  }
+  .btn-newmatter:hover { border-color: var(--gold); color: var(--gold); }
+
+  a.back-link { color: #c8cede; text-decoration: none; font-family: var(--mono); font-size: 11px; }
+  a.back-link:hover { color: var(--gold); }
+
+  /* ---------------- Layout shell ---------------- */
+  .shell {
+    flex: 1; display: flex; min-height: 0;
+    max-width: 1180px; width: 100%; margin: 0 auto;
+  }
+
+  /* ---------------- Sidebar: case tools ---------------- */
+  .sidebar {
+    width: 290px; flex-shrink: 0;
+    border-right: 1px solid var(--paper-line);
+    padding: 18px 16px 18px;
+    overflow-y: auto;
+  }
+  .sidebar-section { margin-bottom: 22px; }
+  .sidebar-label {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+  }
+  .sidebar-card {
+    background: var(--paper-raised); border: 1px solid var(--paper-line); border-radius: 8px;
+    padding: 13px; margin-bottom: 10px;
+  }
+  .sidebar-card h4 { margin: 0 0 4px; font-size: 13px; font-family: var(--serif); font-weight: 700; }
+  .sidebar-card p { margin: 0 0 10px; font-size: 11.5px; color: var(--ink-soft); line-height: 1.45; }
+  .field-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+  .field-row label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.03em; }
+  select, input[type=text], input[type=file], textarea {
+    font-family: var(--sans); font-size: 12.5px; padding: 7px 8px;
+    border-radius: 5px; border: 1px solid var(--paper-line); background: var(--paper);
+    color: var(--ink); width: 100%;
+  }
+  select:focus, input:focus, textarea:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+
+  .tip-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 15px; height: 15px; border-radius: 50%;
+    border: 1px solid var(--muted); color: var(--muted);
+    font-size: 10px; font-family: var(--mono); cursor: help; flex-shrink: 0;
+  }
+  [data-tooltip] { position: relative; }
+  [data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%) translateY(4px);
+    width: 220px; background: var(--ink); color: var(--paper);
+    font-family: var(--sans); font-size: 11.5px; line-height: 1.4; font-weight: 400;
+    padding: 9px 11px; border-radius: 6px; letter-spacing: normal; text-transform: none;
+    opacity: 0; visibility: hidden; transition: opacity .15s ease, transform .15s ease;
+    pointer-events: none; z-index: 30; box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+  }
+  [data-tooltip]::before {
+    content: ""; position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%) translateY(4px);
+    border: 5px solid transparent; border-top-color: var(--ink);
+    opacity: 0; visibility: hidden; transition: opacity .15s ease, transform .15s ease; z-index: 30;
+  }
+  [data-tooltip]:hover::after, [data-tooltip]:focus::after,
+  [data-tooltip].tip-open::after { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+  [data-tooltip]:hover::before, [data-tooltip]:focus::before,
+  [data-tooltip].tip-open::before { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+
+  .btn {
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.03em;
+    padding: 9px 12px; border-radius: 5px; border: none; cursor: pointer;
+    width: 100%; text-align: center;
+  }
+  .btn-primary { background: var(--ink); color: var(--paper); }
+  .btn-primary:hover { background: var(--ink-soft); }
+  .btn-outline { background: transparent; border: 1px solid var(--ink); color: var(--ink); }
+  .btn-outline:hover { background: var(--ink); color: var(--paper); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .radio-tip-row { display: flex; align-items: center; gap: 6px; }
+
+  #draftOutputWrap { display: none; margin-top: 10px; }
+  #draftOutput {
+    white-space: pre-wrap; background: var(--paper-raised); border: 1px solid var(--paper-line);
+    border-radius: 6px; padding: 12px; font-family: var(--mono); font-size: 11px;
+    max-height: 240px; overflow-y: auto; line-height: 1.5;
+  }
+  .draft-actions { display: flex; gap: 6px; margin-top: 6px; }
+  .draft-actions .btn { font-size: 10.5px; padding: 6px 8px; }
+
+  /* ---------------- Chat column ---------------- */
+  .chat-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+  #chat {
+    flex: 1; overflow-y: auto; padding: 22px 26px 10px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .empty-state {
+    margin: auto; text-align: center; max-width: 380px; color: var(--muted);
+    padding: 20px;
+  }
+  .empty-state .seal-big {
+    width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 50%;
+    border: 2px solid var(--stamp); display: flex; align-items: center; justify-content: center;
+    color: var(--stamp); font-family: var(--serif); font-weight: 700; font-size: 22px; transform: rotate(-8deg);
+  }
+  .empty-state h3 { font-family: var(--serif); font-size: 18px; color: var(--ink); margin: 0 0 8px; }
+  .empty-state p { font-size: 13px; line-height: 1.55; margin: 0; }
+
+  .msg-row { display: flex; gap: 10px; max-width: 88%; }
+  .msg-row.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-row.assistant, .msg-row.clarify { align-self: flex-start; }
+
+  .avatar {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 10.5px; font-weight: 700;
+    margin-top: 2px;
+  }
+  .avatar.user-av { background: var(--ink); color: var(--paper); }
+  .avatar.assist-av { background: var(--paper-raised); border: 1.5px solid var(--stamp); color: var(--stamp); }
+
+  .bubble {
+    border-radius: 10px; padding: 12px 15px; font-size: 14px; line-height: 1.6;
+    position: relative;
+  }
+  .msg-row.user .bubble { background: var(--ink); color: var(--paper); border-top-right-radius: 3px; }
+  .msg-row.assistant .bubble {
+    background: var(--paper-raised); border: 1px solid var(--paper-line);
+    border-left: 3px solid var(--ink-soft);
+    border-top-left-radius: 3px;
+  }
+  .msg-row.clarify .bubble {
+    background: var(--gold-soft); border: 1px solid var(--gold);
+    border-left: 3px solid var(--gold);
+    border-top-left-radius: 3px;
+  }
+  .bubble.simplified { border-left-color: var(--seal-green); }
+
+  .bubble p:first-child { margin-top: 0; }
+  .bubble p:last-child { margin-bottom: 0; }
+  .bubble ul, .bubble ol { padding-left: 20px; margin: 8px 0; }
+  .bubble li { margin: 3px 0; }
+  .bubble code { font-family: var(--mono); background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 3px; font-size: 12.5px; }
+  .bubble strong { color: var(--stamp); }
+  .msg-row.user .bubble strong { color: var(--gold-soft); }
+
+  .caret { display: inline-block; width: 7px; background: var(--ink-soft); animation: blink 0.9s steps(1) infinite; margin-left: 1px; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .badge-row {
+    margin-top: 14px; border-top: 1px solid var(--paper-line); padding-top: 10px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .badge-row:empty { display: none; margin-top: 0; padding-top: 0; border-top: none; }
+  .citation-legend {
+    font-family: var(--mono); font-size: 10.5px; color: var(--muted);
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 2px;
+  }
+  .leg-item { display: inline-flex; align-items: center; gap: 4px; font-weight: 500; }
+  .leg-verified { color: var(--seal-green); }
+  .leg-web { color: #1a73e8; }
+  .leg-unsure { color: var(--stamp); }
+  .citation-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+
+  .tag { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 999px; letter-spacing: 0.02em; }
+  .tag.verified { background: var(--seal-green-soft); color: var(--seal-green); }
+  .tag.web-sourced { background: #dbeafe; color: #1e3a8a; }
+  .tag.unconfirmed { background: var(--stamp-soft); color: var(--stamp); }
+  .tag.simplified-tag { background: var(--seal-green-soft); color: var(--seal-green); }
+  .tag.web-fallback-note { background: #eef2ff; color: #4338ca; }
+
+  .msg-actions { display: flex; gap: 6px; margin-top: 10px; }
+  .msg-actions button {
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.02em;
+    padding: 5px 10px; border-radius: 999px; cursor: pointer;
+    background: transparent; border: 1px solid var(--paper-line); color: var(--ink-soft);
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .msg-actions button:hover { border-color: var(--ink-soft); background: var(--paper); }
+  .msg-actions button:disabled { opacity: 0.5; cursor: default; }
+
+  .options-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .option-btn {
+    background: var(--paper-raised); border: 1.5px solid var(--ink); color: var(--ink);
+    padding: 7px 13px; border-radius: 999px; font-size: 12.5px; cursor: pointer; font-family: var(--sans);
+  }
+  .option-btn:hover { background: var(--ink); color: var(--paper); }
+  .option-btn.custom { border-style: dashed; color: var(--muted); border-color: var(--muted); }
+  .custom-answer-row { display: none; gap: 8px; margin-top: 8px; }
+  .custom-answer-row.active { display: flex; }
+  .custom-answer-row input { flex: 1; }
+  .custom-answer-row button { padding: 7px 12px; font-size: 12px; border-radius: 6px; border: none; background: var(--ink); color: var(--paper); cursor: pointer; }
+
+  .thinking-dots { display: inline-flex; gap: 3px; padding: 3px 0; }
+  .thinking-dots span { width: 5px; height: 5px; border-radius: 50%; background: var(--muted); animation: bounce 1.2s infinite ease-in-out; }
+  .thinking-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .thinking-dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); opacity: 0.4; } 40% { transform: translateY(-4px); opacity: 1; } }
+
+  /* ---------------- Composer ---------------- */
+  .composer-wrap {
+    border-top: 1px solid var(--paper-line); background: var(--paper);
+    padding: 12px 26px 18px; flex-shrink: 0;
+  }
+  .composer {
+    display: flex; align-items: flex-end; gap: 8px;
+    background: var(--paper-raised); border: 1px solid var(--paper-line); border-radius: 12px;
+    padding: 8px 8px 8px 14px;
+  }
+  .composer:focus-within { border-color: var(--ink-soft); }
+  #msgInput {
+    flex: 1; border: none; background: transparent; resize: none;
+    font-family: var(--sans); font-size: 14px; line-height: 1.5; color: var(--ink);
+    padding: 7px 0; max-height: 140px;
+  }
+  #msgInput:focus { outline: none; }
+  .composer-btn {
+    width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .mic-btn { background: var(--paper); border: 1px solid var(--paper-line); color: var(--ink-soft); }
+  .mic-btn.recording { background: var(--stamp); color: white; animation: pulse-mic 1.2s infinite; border-color: var(--stamp); }
+  @keyframes pulse-mic { 0%,100% { box-shadow: 0 0 0 0 rgba(156,43,33,0.4); } 50% { box-shadow: 0 0 0 7px rgba(156,43,33,0); } }
+  .send-btn { background: var(--ink); color: var(--paper); }
+  .send-btn:hover { background: var(--ink-soft); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .web-search-toggle {
+    width: auto; height: 36px; padding: 0 12px; border-radius: 18px;
+    border: 1px solid var(--paper-line); background: var(--paper);
+    color: var(--ink-soft); font-size: 12px; cursor: pointer;
+    transition: all .2s ease; display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; gap: 5px; font-family: var(--sans);
+  }
+  .web-search-toggle.active {
+    background: #eef6ff; color: #1a73e8; border-color: #aecbfa;
+    font-weight: 600; box-shadow: 0 0 6px rgba(26,115,232,.18);
+  }
+  .follow-up-options { margin: 12px 0 6px; }
+  .follow-up-heading { font-size: 12.5px; font-weight: 600; color: var(--ink); margin-bottom: 6px; font-family: var(--sans); }
+  .follow-up-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+  .follow-up-btns .option-btn {
+    font-size: 12px; padding: 6px 12px; background: var(--gold-soft);
+    border: 1px solid var(--gold); border-radius: 999px; cursor: pointer;
+    color: var(--ink); transition: background .15s, transform .1s; font-family: var(--sans);
+    line-height: 1.35; text-align: left;
+  }
+  .follow-up-btns .option-btn:hover { background: var(--gold); transform: translateY(-1px); }
+  .citation-link { color: #1a73e8; text-decoration: none; font-size: inherit; }
+  .citation-link:hover { text-decoration: underline; }
+  .composer-hint { font-family: var(--mono); font-size: 10px; color: var(--muted); text-align: center; margin-top: 8px; letter-spacing: 0.02em; }
+
+  /* ---------------- Past matters sidebar & status ---------------- */
+  .past-matters-list { display: flex; flex-direction: column; gap: 6px; max-height: 180px; overflow-y: auto; }
+  .past-matter-item {
+    font-size: 11.5px; padding: 7px 9px; border-radius: 6px; border: 1px solid var(--paper-line);
+    background: var(--paper); display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; transition: border-color .15s ease, background .15s ease;
+  }
+  .past-matter-item:hover { border-color: var(--ink-soft); }
+  .past-matter-item.active { border-color: var(--gold); background: var(--gold-soft); font-weight: 600; }
+  .past-matter-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; margin-right: 6px; }
+  .past-matter-del {
+    border: none; background: transparent; color: var(--muted); cursor: pointer;
+    font-size: 14px; padding: 0 4px; border-radius: 3px; line-height: 1;
+  }
+  .past-matter-del:hover { color: var(--stamp); background: var(--stamp-soft); }
+  .search-status-box { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); display: inline-flex; align-items: center; gap: 6px; }
+
+  /* ---------------- Scrollbars ---------------- */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--paper-line); border-radius: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+
+  /* ---------------- Toast ---------------- */
+  #toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: var(--paper); font-family: var(--mono); font-size: 12px;
+    padding: 9px 16px; border-radius: 999px; opacity: 0; pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease; z-index: 100;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------------- Responsive ---------------- */
+  @media (max-width: 880px) {
+    .shell { flex-direction: column; }
+    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--paper-line); max-height: 46vh; }
+    #chat { padding: 16px; }
+    .composer-wrap { padding: 10px 14px 14px; }
+    .msg-row { max-width: 96%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="letterhead">
+  <div class="brand">
+    <div class="seal">NS</div>
+    <div>
+      <div class="name" data-i18n="brandName">Nyaya Sahayak</div>
+      <div class="tagline" data-i18n="brandTagline">Consultation Room — Not a Lawyer</div>
+    </div>
+  </div>
+  <div class="letterhead-controls">
+    <a class="back-link" href="../landing/index.html" data-i18n="backLink">&larr; Back to overview</a>
+    <div id="statusPill" class="status-pill"><span class="dot"></span><span data-i18n="statusChecking">Checking model…</span></div>
+    <div class="lang-toggle">
+      <button id="langEnBtn" class="active" onclick="setLanguage('en')">EN</button>
+      <button id="langHiBtn" onclick="setLanguage('hi')">हिं</button>
+    </div>
+    <button class="btn-newmatter" onclick="startNewMatter()" data-i18n="newMatter">+ New matter</button>
+  </div>
+</header>
+
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label" data-i18n="sidebarPastLabel">📁 Past Matters</div>
+      <div class="sidebar-card">
+        <div id="pastMattersList" class="past-matters-list">
+          <p class="muted-text" style="font-size:11px; color:var(--muted); margin:0;" data-i18n="noPastMatters">No previous matters saved.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label" data-i18n="sidebarDocsLabel">📎 Documents</div>
+      <div class="sidebar-card">
+        <h4 data-i18n="uploadCardTitle">Add to this matter</h4>
+        <p data-i18n="uploadCardDesc">Attach a file so the assistant can use it in this conversation.</p>
+        <div class="field-row">
+          <label class="radio-tip-row" data-i18n="docRoleLabel">
+            Document type
+            <span class="tip-icon" tabindex="0"
+                  data-tooltip-en="Evidence: notices, receipts, screenshots — treated as facts we extract, never as verified law. &quot;This is the law&quot;: a document you believe states the applicable rule — we cross-check it against our verified database before trusting any of it."
+                  data-tooltip-hi="साक्ष्य: नोटिस, रसीदें, स्क्रीनशॉट — इन्हें तथ्यों के रूप में लिया जाता है, कानून के रूप में नहीं। &quot;यह कानून है&quot;: वह दस्तावेज़ जिसमें आपको लगता है कि लागू नियम लिखा है — भरोसा करने से पहले हम इसे अपने सत्यापित डेटाबेस से जांचते हैं।"
+                  data-tooltip="Evidence vs. law claim — hover for details">?</span>
+          </label>
+          <select id="docRole">
+            <option value="evidence" data-i18n="docRoleEvidence">Evidence document</option>
+            <option value="law_claim" data-i18n="docRoleLaw">"This is the law" document</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <input type="file" id="fileInput" />
+        </div>
+        <button class="btn btn-outline" onclick="uploadFile()" data-i18n="uploadBtn">Upload document</button>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label" data-i18n="sidebarDraftLabel">🖋 Draft a document</div>
+      <div class="sidebar-card">
+        <p data-i18n="draftCardDesc">Generate a ready-to-file document from this conversation.</p>
+        <div class="field-row">
+          <label data-i18n="draftTypeLabel">Document type</label>
+          <select id="draftType" onchange="onDraftTypeChange()">
+            <option value="rti" data-i18n="draftTypeRti">RTI application</option>
+            <option value="complaint" data-i18n="draftTypeComplaint">Complaint letter</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <label id="draftTargetLabel" data-i18n="draftTargetLabel">Department / recipient</label>
+          <input type="text" id="draftTarget" />
+        </div>
+        <div class="field-row" id="draftSubjectRow" style="display:none;">
+          <label data-i18n="draftSubjectLabel">Subject of complaint</label>
+          <input type="text" id="draftSubject" />
+        </div>
+        <button class="btn btn-primary" onclick="draftDoc()" data-i18n="draftBtn">Generate document</button>
+        <div id="draftOutputWrap">
+          <div id="draftOutput"></div>
+          <div class="draft-actions">
+            <button class="btn btn-outline" onclick="copyDraft()" data-i18n="draftCopyBtn">Copy text</button>
+            <button class="btn btn-outline" onclick="downloadDraft()" data-i18n="draftDownloadBtn">Download .txt</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="chat-col">
+    <div id="chat">
+      <div class="empty-state" id="emptyState">
+        <div class="seal-big">NS</div>
+        <h3 data-i18n="emptyTitle">State your matter</h3>
+        <p data-i18n="emptyDesc">Describe your situation in plain words — a notice you received, a right you're unsure of, a department that's gone quiet. The assistant will ask a clarifying question if it needs one, then give you a cited answer.</p>
+      </div>
+    </div>
+
+    <div class="composer-wrap">
+      <div class="composer">
+        <textarea id="msgInput" rows="1" data-i18n-placeholder="composerPlaceholder" placeholder="Ask about your rights…"></textarea>
+        <button class="web-search-toggle" id="webSearchToggle" onclick="toggleWebSearch()" title="Toggle live web search">
+          <span>🌐</span><span data-i18n="webSearchBtn">Web Search</span>
+        </button>
+        <button class="composer-btn mic-btn" id="micBtn" onclick="toggleVoiceInput()" title="Voice input" data-tooltip="Voice input">🎤</button>
+        <button class="composer-btn send-btn" id="sendBtn" onclick="sendMessage()" title="Send">➤</button>
+      </div>
+      <div class="composer-hint" data-i18n="composerHint">Not legal advice. For serious matters, please also consult a licensed advocate.</div>
+    </div>
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============================== Config ============================== */
+const API = "http://localhost:8000";
+let sessionId = localStorage.getItem("nyaya_session") || null;
+let currentLang = localStorage.getItem("nyaya_lang") || "en";
+let isWebSearchOn = false;
+
+function toggleWebSearch() {
+  isWebSearchOn = !isWebSearchOn;
+  const btn = document.getElementById("webSearchToggle");
+  btn.classList.toggle("active", isWebSearchOn);
+  showToast(isWebSearchOn ? "Web Search ON" : "Web Search OFF");
+}
+let lastAnswerBubbleEl = null;   // the most recent assistant "answer" bubble (for Explain Simpler scoping)
+let isStreaming = false;
+
+/* ============================== i18n ============================== */
+const I18N = {
+  en: {
+    brandName: "Nyaya Sahayak",
+    brandTagline: "Consultation Room — Not a Lawyer",
+    backLink: "\u2190 Back to overview",
+    statusChecking: "Checking model\u2026",
+    statusOk: "Model connected",
+    statusBad: "LLM not configured",
+    newMatter: "+ New matter",
+    sidebarDocsLabel: "\ud83d\udcce Documents",
+    uploadCardTitle: "Add to this matter",
+    uploadCardDesc: "Attach a file so the assistant can use it in this conversation.",
+    docRoleLabel: "Document type",
+    docRoleEvidence: "Evidence document",
+    docRoleLaw: "\"This is the law\" document",
+    uploadBtn: "Upload document",
+    sidebarDraftLabel: "\ud83d\udd8b Draft a document",
+    draftCardDesc: "Generate a ready-to-file document from this conversation.",
+    draftTypeLabel: "Document type",
+    draftTypeRti: "RTI application",
+    draftTypeComplaint: "Complaint letter",
+    draftTargetLabel: "Department / recipient",
+    draftSubjectLabel: "Subject of complaint",
+    draftBtn: "Generate document",
+    draftCopyBtn: "Copy text",
+    draftDownloadBtn: "Download .txt",
+    emptyTitle: "State your matter",
+    emptyDesc: "Describe your situation in plain words — a notice you received, a right you're unsure of, a department that's gone quiet. The assistant will ask a clarifying question if it needs one, then give you a cited answer.",
+    composerPlaceholder: "Ask about your rights…",
+    composerHint: "Not legal advice. For serious matters, please also consult a licensed advocate.",
+    explainSimpler: "Explain simpler",
+    explaining: "Simplifying\u2026",
+    copyAnswer: "Copy",
+    copied: "Copied",
+    simplifiedBadge: "Simplified",
+    webFallback: "Included live web results",
+    customAnswerOpt: "Type my own answer",
+    customAnswerPlaceholder: "Your answer\u2026",
+    customAnswerSend: "Send",
+    uploadNoSession: "Send a chat message first to start a matter.",
+    draftNoSession: "Send a chat message first to start a matter.",
+    docUploaded: "Document processed and added to this matter.",
+    voiceUnsupported: "Voice input isn't supported in this browser.",
+    voiceListening: "Listening\u2026 speak now.",
+    newMatterConfirm: "Start a new matter? This clears the current conversation view.",
+    sidebarPastLabel: "\ud83d\udcc1 Past Matters",
+    noPastMatters: "No previous matters saved.",
+    searchingLocal: "Searching legal database\u2026",
+    searchingWeb: "Searching the web\u2026",
+    webSearchBtn: "Web Search",
+    followUpHeading: "You might also want to know / ask:",
+    legVerified: "Verified Legal DB",
+    legWeb: "Web Search Result",
+    legUnsure: "Unconfirmed",
+    deleteMatterConfirm: "Delete this matter permanently?",
+  },
+  hi: {
+    brandName: "\u0928\u094d\u092f\u093e\u092f \u0938\u0939\u093e\u092f\u0915",
+    brandTagline: "\u092a\u0930\u093e\u092e\u0930\u094d\u0936 \u0915\u0915\u094d\u0937 — \u0935\u0915\u0940\u0932 \u0928\u0939\u0940\u0902",
+    backLink: "\u2190 \u0935\u093e\u092a\u0938 \u091c\u093e\u090f\u0902",
+    statusChecking: "\u092e\u0949\u0921\u0932 \u091c\u093e\u0902\u091a \u0930\u0939\u0947 \u0939\u0948\u0902…",
+    statusOk: "\u092e\u0949\u0921\u0932 \u091c\u0941\u0921\u093c\u093e \u0939\u0941\u0906",
+    statusBad: "LLM \u0938\u0947\u091f\u0905\u092a \u0928\u0939\u0940\u0902 \u0939\u0948",
+    newMatter: "+ \u0928\u092f\u093e \u092e\u093e\u092e\u0932\u093e",
+    sidebarDocsLabel: "\ud83d\udcce \u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़",
+    uploadCardTitle: "\u0907\u0938 \u092e\u093e\u092e\u0932\u0947 \u092e\u0947\u0902 \u091c\u094b\u0921़\u0947\u0902",
+    uploadCardDesc: "\u090f\u0915 \u092b़\u093e\u0907\u0932 \u0905\u092a\u0932\u094b\u0921 \u0915\u0930\u0947\u0902 \u0924\u093e\u0915\u093f \u0938\u0939\u093e\u092f\u0915 \u0907\u0938\u0947 \u092c\u093e\u0924\u091a\u0940\u0924 \u092e\u0947\u0902 \u0907\u0938\u094d\u0924\u0947\u092e\u093e\u0932 \u0915\u0930 \u0938\u0915\u0947\u0964",
+    docRoleLabel: "\u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़ \u0915\u093e \u092a\u094d\u0930\u0915\u093e\u0930",
+    docRoleEvidence: "\u0938\u093e\u0915\u094d\u0937\u094d\u092f \u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़",
+    docRoleLaw: "\"\u092f\u0939 \u0915\u093e\u0928\u0942\u0928 \u0939\u0948\" \u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़",
+    uploadBtn: "\u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़ \u0905\u092a\u0932\u094b\u0921 \u0915\u0930\u0947\u0902",
+    sidebarDraftLabel: "\ud83d\udd8b \u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़ \u0924\u0948\u092f\u093e\u0930 \u0915\u0930\u0947\u0902",
+    draftCardDesc: "\u0907\u0938 \u092c\u093e\u0924\u091a\u0940\u0924 \u0938\u0947 \u090f\u0915 \u0924\u0948\u092f\u093e\u0930 \u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़ \u092c\u0928\u093e\u090f\u0902\u0964",
+    draftTypeLabel: "\u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़ \u0915\u093e \u092a\u094d\u0930\u0915\u093e\u0930",
+    draftTypeRti: "RTI \u0906\u0935\u0947\u0926\u0928",
+    draftTypeComplaint: "\u0936\u093f\u0915\u093e\u092f\u0924 \u092a\u0924\u094d\u0930",
+    draftTargetLabel: "\u0935\u093f\u092d\u093e\u0917 / \u092a\u094d\u0930\u093e\u092a\u094d\u0924\u0915\u0930\u094d\u0924\u093e",
+    draftSubjectLabel: "\u0936\u093f\u0915\u093e\u092f\u0924 \u0915\u093e \u0935\u093f\u0937\u092f",
+    draftBtn: "\u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़ \u092c\u0928\u093e\u090f\u0902",
+    draftCopyBtn: "\u091f\u0947\u0915\u094d\u0938\u094d\u091f \u0915\u0949\u092a\u0940 \u0915\u0930\u0947\u0902",
+    draftDownloadBtn: ".txt \u0921\u093e\u0909\u0928\u0932\u094b\u0921 \u0915\u0930\u0947\u0902",
+    emptyTitle: "\u0905\u092a\u0928\u093e \u092e\u093e\u092e\u0932\u093e \u092c\u0924\u093e\u090f\u0902",
+    emptyDesc: "\u0905\u092a\u0928\u0940 \u0938\u094d\u0925\u093f\u0924\u093f \u0938\u0930\u0932 \u0936\u092c\u094d\u0926\u094b\u0902 \u092e\u0947\u0902 \u092c\u0924\u093e\u090f\u0902 — \u0915\u094b\u0908 \u0928\u094b\u091f\u093f\u0938, \u0915\u094b\u0908 \u0905\u0927\u093f\u0915\u093e\u0930 \u091c\u093f\u0938\u0947 \u0932\u0947\u0915\u0930 \u0906\u092a \u0905\u0928\u093f\u0936\u094d\u091a\u093f\u0924 \u0939\u0948\u0902, \u092f\u093e \u0915\u094b\u0908 \u0935\u093f\u092d\u093e\u0917 \u091c\u094b \u091a\u0941\u092a \u0939\u094b \u0917\u092f\u093e \u0939\u094b\u0964",
+    composerPlaceholder: "\u0905\u092a\u0928\u0947 \u0905\u0927\u093f\u0915\u093e\u0930\u094b\u0902 \u0915\u0947 \u092c\u093e\u0930\u0947 \u092e\u0947\u0902 \u092a\u0942\u091b\u0947\u0902…",
+    composerHint: "\u092f\u0939 \u0915\u093e\u0928\u0942\u0928\u0940 \u0938\u0932\u093e\u0939 \u0928\u0939\u0940\u0902 \u0939\u0948\u0964 \u0917\u0902\u092d\u0940\u0930 \u092e\u093e\u092e\u0932\u094b\u0902 \u0915\u0947 \u0932\u093f\u090f \u0915\u0943\u092a\u092f\u093e \u0935\u0915\u0940\u0932 \u0938\u0947 \u092d\u0940 \u0938\u0932\u093e\u0939 \u0932\u0947\u0902\u0964",
+    explainSimpler: "\u0906\u0938\u093e\u0928 \u092d\u093e\u0937\u093e \u092e\u0947\u0902 \u0938\u092e\u091d\u093e\u090f\u0902",
+    explaining: "\u0938\u0930\u0932 \u092c\u0928\u093e\u092f\u093e \u091c\u093e \u0930\u0939\u093e \u0939\u0948…",
+    copyAnswer: "\u0915\u0949\u092a\u0940",
+    copied: "\u0915\u0949\u092a\u0940 \u0939\u094b \u0917\u092f\u093e",
+    simplifiedBadge: "\u0938\u0930\u0932 \u0930\u0942\u092a",
+    webFallback: "\u0932\u093e\u0907\u0935 \u0935\u0947\u092c \u0928\u0924\u0940\u091c\u0947 \u0936\u093e\u092e\u093f\u0932",
+    customAnswerOpt: "\u0916\u0941\u0926 \u0932\u093f\u0916\u0947\u0902",
+    customAnswerPlaceholder: "\u0906\u092a\u0915\u093e \u091c\u0935\u093e\u092c…",
+    customAnswerSend: "\u092d\u0947\u091c\u0947\u0902",
+    uploadNoSession: "\u092a\u0939\u0932\u0947 \u090f\u0915 \u0938\u0902\u0926\u0947\u0936 \u092d\u0947\u091c\u0947\u0902\u0964",
+    draftNoSession: "\u092a\u0939\u0932\u0947 \u090f\u0915 \u0938\u0902\u0926\u0947\u0936 \u092d\u0947\u091c\u0947\u0902\u0964",
+    docUploaded: "\u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़ \u092a\u094d\u0930\u094b\u0938\u0947\u0938 \u0939\u094b \u0917\u092f\u093e\u0964",
+    voiceUnsupported: "\u0907\u0938 \u092c\u094d\u0930\u093e\u0909\u091c़\u0930 \u092e\u0947\u0902 \u0935\u0949\u0907\u0938 \u0907\u0928\u092a\u0941\u091f \u0938\u092a\u094b\u0930\u094d\u091f\u0947\u0921 \u0928\u0939\u0940\u0902 \u0939\u0948\u0964",
+    voiceListening: "\u0938\u0941\u0928 \u0930\u0939\u0947 \u0939\u0948\u0902… \u0905\u092c \u092c\u094b\u0932\u0947\u0902\u0964",
+    newMatterConfirm: "\u0928\u092f\u093e \u092e\u093e\u092e\u0932\u093e \u0936\u0941\u0930\u0942 \u0915\u0930\u0947\u0902?",
+    sidebarPastLabel: "\ud83d\udcc1 \u092a\u093f\u091b\u0932\u0947 \u092e\u093e\u092e\u0932\u0947",
+    noPastMatters: "\u0915\u094b\u0908 \u092a\u0941\u0930\u093e\u0928\u093e \u092e\u093e\u092e\u0932\u093e \u0928\u0939\u0940\u0902 \u092e\u093f\u0932\u093e\u0964",
+    searchingLocal: "\u0915\u093e\u0928\u0942\u0928 \u0921\u0947\u091f\u093e\u092c\u0947\u0938 \u092e\u0947\u0902 \u0916\u094b\u091c \u091c\u093e\u0930\u0940 \u0939\u0948\u2026",
+    searchingWeb: "\u0935\u0947\u092c \u092a\u0930 \u0916\u094b\u091c \u091c\u093e\u0930\u0940 \u0939\u0948\u2026",
+    webSearchBtn: "\u0935\u0947\u092c \u0916\u094b\u091c",
+    followUpHeading: "\u0906\u092a \u092f\u0939 \u092d\u0940 \u091c\u093e\u0928\u0928\u093e / \u092a\u0942\u091b\u0928\u093e \u091a\u093e\u0939 \u0938\u0915\u0924\u0947 \u0939\u0948\u0902:",
+    legVerified: "\u0938\u0924\u094d\u092f\u093e\u092a\u093f\u0924 \u0915\u093e\u0928\u0942\u0928 \u0921\u0947\u091f\u093e\u092c\u0947\u0938",
+    legWeb: "\u0935\u0947\u092c \u0916\u094b\u091c \u0928\u0924\u0940\u091c\u093e",
+    legUnsure: "\u0905\u092a\u0941\u0937\u094d\u091f \u091c\u093e\u0928\u0915\u093e\u0930\u0940",
+    deleteMatterConfirm: "\u0915\u094d\u092f\u093e \u0906\u092a \u0907\u0938 \u092e\u093e\u092e\u0932\u0947 \u0915\u094b \u0939\u092e\u0947\u0936\u093e \u0915\u0947 \u0932\u093f\u090f \u0939\u091f\u093e\u0928\u093e \u091a\u093e\u0939\u0924\u0947 \u0939\u0948\u0902?",
+    statusBad: "LLM \u0938\u0947\u091f\u0905\u092a \u0928\u0939\u0940\u0902 \u0939\u0948",
+    newMatter: "+ \u0928\u092f\u093e \u092e\u093e\u092e\u0932\u093e",
+    sidebarDocsLabel: "\ud83d\udcce \u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़",
+    uploadCardTitle: "\u0907\u0938 \u092e\u093e\u092e\u0932\u0947 \u092e\u0947\u0902 \u091c\u094b\u0921़\u0947\u0902",
+    uploadCardDesc: "\u090f\u0915 \u092b़\u093e\u0907\u0932 \u0905\u092a\u0932\u094b\u0921 \u0915\u0930\u0947\u0902 \u0924\u093e\u0915\u093f \u0938\u0939\u093e\u092f\u0915 \u0907\u0938\u0947 \u092c\u093e\u0924\u091a\u0940\u0924 \u092e\u0947\u0902 \u0907\u0938\u094d\u0924\u0947\u092e\u093e\u0932 \u0915\u0930 \u0938\u0915\u0947\u0964",
+    docRoleLabel: "\u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़ \u0915\u093e \u092a\u094d\u0930\u0915\u093e\u0930",
+    docRoleEvidence: "\u0938\u093e\u0915\u094d\u0937\u094d\u092f \u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़",
+    docRoleLaw: "\"\u092f\u0939 \u0915\u093e\u0928\u0942\u0928 \u0939\u0948\" \u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़",
+    uploadBtn: "\u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़ \u0905\u092a\u0932\u094b\u0921 \u0915\u0930\u0947\u0902",
+    sidebarDraftLabel: "\ud83d\udd8b \u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़ \u0924\u0948\u092f\u093e\u0930 \u0915\u0930\u0947\u0902",
+    draftCardDesc: "\u0907\u0938 \u092c\u093e\u0924\u091a\u0940\u0924 \u0938\u0947 \u090f\u0915 \u0924\u0948\u092f\u093e\u0930 \u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़ \u092c\u0928\u093e\u090f\u0902\u0964",
+    draftTypeLabel: "\u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़ \u0915\u093e \u092a\u094d\u0930\u0915\u093e\u0930",
+    draftTypeRti: "RTI \u0906\u0935\u0947\u0926\u0928",
+    draftTypeComplaint: "\u0936\u093f\u0915\u093e\u092f\u0924 \u092a\u0924\u094d\u0930",
+    draftTargetLabel: "\u0935\u093f\u092d\u093e\u0917 / \u092a\u094d\u0930\u093e\u092a\u094d\u0924\u0915\u0930\u094d\u0924\u093e",
+    draftSubjectLabel: "\u0936\u093f\u0915\u093e\u092f\u0924 \u0915\u093e \u0935\u093f\u0937\u092f",
+    draftBtn: "\u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़ \u092c\u0928\u093e\u090f\u0902",
+    draftCopyBtn: "\u091f\u0947\u0915\u094d\u0938\u094d\u091f \u0915\u0949\u092a\u0940 \u0915\u0930\u0947\u0902",
+    draftDownloadBtn: ".txt \u0921\u093e\u0909\u0928\u0932\u094b\u0921 \u0915\u0930\u0947\u0902",
+    emptyTitle: "\u0905\u092a\u0928\u093e \u092e\u093e\u092e\u0932\u093e \u092c\u0924\u093e\u090f\u0902",
+    emptyDesc: "\u0905\u092a\u0928\u0940 \u0938\u094d\u0925\u093f\u0924\u093f \u0938\u0930\u0932 \u0936\u092c\u094d\u0926\u094b\u0902 \u092e\u0947\u0902 \u092c\u0924\u093e\u090f\u0902 — \u0915\u094b\u0908 \u0928\u094b\u091f\u093f\u0938, \u0915\u094b\u0908 \u0905\u0927\u093f\u0915\u093e\u0930 \u091c\u093f\u0938\u0947 \u0932\u0947\u0915\u0930 \u0906\u092a \u0905\u0928\u093f\u0936\u094d\u091a\u093f\u0924 \u0939\u0948\u0902, \u092f\u093e \u0915\u094b\u0908 \u0935\u093f\u092d\u093e\u0917 \u091c\u094b \u091a\u0941\u092a \u0939\u094b \u0917\u092f\u093e \u0939\u094b\u0964",
+    composerPlaceholder: "\u0905\u092a\u0928\u0947 \u0905\u0927\u093f\u0915\u093e\u0930\u094b\u0902 \u0915\u0947 \u092c\u093e\u0930\u0947 \u092e\u0947\u0902 \u092a\u0942\u091b\u0947\u0902…",
+    composerHint: "\u092f\u0939 \u0915\u093e\u0928\u0942\u0928\u0940 \u0938\u0932\u093e\u0939 \u0928\u0939\u0940\u0902 \u0939\u0948\u0964 \u0917\u0902\u092d\u0940\u0930 \u092e\u093e\u092e\u0932\u094b\u0902 \u0915\u0947 \u0932\u093f\u090f \u0915\u0943\u092a\u092f\u093e \u0935\u0915\u0940\u0932 \u0938\u0947 \u092d\u0940 \u0938\u0932\u093e\u0939 \u0932\u0947\u0902\u0964",
+    explainSimpler: "\u0906\u0938\u093e\u0928 \u092d\u093e\u0937\u093e \u092e\u0947\u0902 \u0938\u092e\u091d\u093e\u090f\u0902",
+    explaining: "\u0938\u0930\u0932 \u092c\u0928\u093e\u092f\u093e \u091c\u093e \u0930\u0939\u093e \u0939\u0948…",
+    copyAnswer: "\u0915\u0949\u092a\u0940",
+    copied: "\u0915\u0949\u092a\u0940 \u0939\u094b \u0917\u092f\u093e",
+    simplifiedBadge: "\u0938\u0930\u0932 \u0930\u0942\u092a",
+    webFallback: "\u0932\u093e\u0907\u0935 \u0935\u0947\u092c \u0928\u0924\u0940\u091c\u0947 \u0936\u093e\u092e\u093f\u0932",
+    customAnswerOpt: "\u0916\u0941\u0926 \u0932\u093f\u0916\u0947\u0902",
+    customAnswerPlaceholder: "\u0906\u092a\u0915\u093e \u091c\u0935\u093e\u092c…",
+    customAnswerSend: "\u092d\u0947\u091c\u0947\u0902",
+    uploadNoSession: "\u092a\u0939\u0932\u0947 \u090f\u0915 \u0938\u0902\u0926\u0947\u0936 \u092d\u0947\u091c\u0947\u0902\u0964",
+    draftNoSession: "\u092a\u0939\u0932\u0947 \u090f\u0915 \u0938\u0902\u0926\u0947\u0936 \u092d\u0947\u091c\u0947\u0902\u0964",
+    docUploaded: "\u0926\u0938\u094d\u0924\u093e\u0935\u0947\u091c़ \u092a\u094d\u0930\u094b\u0938\u0947\u0938 \u0939\u094b \u0917\u092f\u093e\u0964",
+    voiceUnsupported: "\u0907\u0938 \u092c\u094d\u0930\u093e\u0909\u091c़\u0930 \u092e\u0947\u0902 \u0935\u0949\u0907\u0938 \u0907\u0928\u092a\u0941\u091f \u0938\u092a\u094b\u0930\u094d\u091f\u0947\u0921 \u0928\u0939\u0940\u0902 \u0939\u0948\u0964",
+    voiceListening: "\u0938\u0941\u0928 \u0930\u0939\u0947 \u0939\u0948\u0902… \u0905\u092c \u092c\u094b\u0932\u0947\u0902\u0964",
+    newMatterConfirm: "\u0928\u092f\u093e \u092e\u093e\u092e\u0932\u093e \u0936\u0941\u0930\u0942 \u0915\u0930\u0947\u0902?",
+  }
+};
+function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || I18N.en[key] || key; }
+
+function applyI18n() {
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.getAttribute("data-i18n")); });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => { el.placeholder = t(el.getAttribute("data-i18n-placeholder")); });
+  document.querySelectorAll("[data-tooltip-en]").forEach(el => {
+    el.setAttribute("data-tooltip", currentLang === "hi" ? el.getAttribute("data-tooltip-hi") : el.getAttribute("data-tooltip-en"));
+  });
+  document.documentElement.lang = currentLang;
+}
+
+function setLanguage(lang) {
+  currentLang = lang;
+  localStorage.setItem("nyaya_lang", lang);
+  document.getElementById("langEnBtn").classList.toggle("active", lang === "en");
+  document.getElementById("langHiBtn").classList.toggle("active", lang === "hi");
+  applyI18n();
+}
+
+/* ============================== Health check ============================== */
+async function checkHealth() {
+  const pill = document.getElementById("statusPill");
+  try {
+    const res = await fetch(`${API}/health`);
+    const data = await res.json();
+    if (data.llm_configured) {
+      pill.classList.add("ok"); pill.classList.remove("bad");
+      pill.querySelector("span:last-child").textContent = `${t("statusOk")} (${data.llm_model})`;
+    } else {
+      pill.classList.add("bad"); pill.classList.remove("ok");
+      pill.querySelector("span:last-child").textContent = t("statusBad");
+    }
+  } catch (e) {
+    pill.classList.add("bad");
+    pill.querySelector("span:last-child").textContent = t("statusBad");
+  }
+}
+
+/* ============================== Markdown render ============================== */
+function renderMarkdown(raw) {
+  try {
+    const html = marked.parse(raw || "", { breaks: true });
+    return DOMPurify.sanitize(html);
+  } catch (e) {
+    return (raw || "").replace(/</g, "&lt;");
+  }
+}
+
+/* ============================== Toast ============================== */
+let toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 1800);
+}
+
+/* ============================== Chat rendering ============================== */
+function hideEmptyState() {
+  const el = document.getElementById("emptyState");
+  if (el) el.remove();
+}
+
+function scrollChatToBottom() {
+  const chat = document.getElementById("chat");
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function appendUserMessage(text) {
+  hideEmptyState();
+  const chat = document.getElementById("chat");
+  const row = document.createElement("div");
+  row.className = "msg-row user";
+  row.innerHTML = `
+    <div class="avatar user-av">YOU</div>
+    <div class="bubble"></div>`;
+  row.querySelector(".bubble").textContent = text;
+  chat.appendChild(row);
+  scrollChatToBottom();
+}
+
+/**
+ * Creates a streaming assistant bubble shell and returns handles to update it.
+ * kind: "assistant" | "clarify"
+ */
+function appendStreamingBubble(kind, badgeLabel) {
+  hideEmptyState();
+  const chat = document.getElementById("chat");
+  const row = document.createElement("div");
+  row.className = "msg-row " + kind;
+  row.innerHTML = `
+    <div class="avatar assist-av">NS</div>
+    <div class="bubble${badgeLabel === "simplified" ? " simplified" : ""}">
+      <div class="content"><span class="thinking-dots"><span></span><span></span><span></span></span></div>
+      <div class="options-wrap"></div>
+      <div class="badge-row"></div>
+      <div class="msg-actions"></div>
+    </div>`;
+  chat.appendChild(row);
+  scrollChatToBottom();
+
+  const contentEl = row.querySelector(".content");
+  let rawText = "";
+  let started = false;
+
+  return {
+    row,
+    bubble: row.querySelector(".bubble"),
+    setStatusText(text) {
+      if (!started) {
+        contentEl.innerHTML = `<div class="search-status-box"><span>${text}</span><span class="thinking-dots"><span></span><span></span><span></span></span></div>`;
+      }
+    },
+    appendToken(piece) {
+      if (!started) { contentEl.innerHTML = ""; started = true; }
+      rawText += piece;
+      contentEl.innerHTML = renderMarkdown(rawText) + '<span class="caret"></span>';
+      scrollChatToBottom();
+    },
+    finish() {
+      contentEl.innerHTML = renderMarkdown(rawText);
+      return rawText;
+    },
+    rerender(cleanText) {
+      contentEl.innerHTML = renderMarkdown(cleanText);
+    },
+    getBadgeRow() { return row.querySelector(".badge-row"); },
+    getOptionsWrap() { return row.querySelector(".options-wrap"); },
+    getActionsRow() { return row.querySelector(".msg-actions"); },
+  };
+}
+
+function renderCitations(badgeRowEl, citations, usedWebFallback) {
+  const hasCitations = citations && citations.length;
+  if (!hasCitations && !usedWebFallback) return;
+  
+  badgeRowEl.innerHTML = "";
+
+  const legend = document.createElement("div");
+  legend.className = "citation-legend";
+  legend.innerHTML = `
+    <span class="leg-item leg-verified">🟢 ${t("legVerified")}</span>
+    <span class="leg-item leg-web">🔵 ${t("legWeb")}</span>
+    <span class="leg-item leg-unsure">🔴 ${t("legUnsure")}</span>
+  `;
+  badgeRowEl.appendChild(legend);
+
+  const tagsWrap = document.createElement("div");
+  tagsWrap.className = "citation-tags";
+
+  if (usedWebFallback) {
+    const tag = document.createElement("span");
+    tag.className = "tag web-fallback-note";
+    tag.textContent = "\u2192 " + t("webFallback");
+    tagsWrap.appendChild(tag);
+  }
+
+  (citations || []).forEach(c => {
+    const tag = document.createElement("span");
+    tag.className = "tag " + (c.tier || c.source_tier || "verified");
+    if (c.url) {
+      const link = document.createElement("a");
+      link.className = "citation-link";
+      link.href = c.url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = `[${c.index}] ${c.source}`;
+      tag.appendChild(link);
+    } else {
+      tag.textContent = `[${c.index}] ${c.source}`;
+    }
+    tagsWrap.appendChild(tag);
+  });
+
+  badgeRowEl.appendChild(tagsWrap);
+}
+
+function refreshSimplifyButtonsScope(newBubbleHandle) {
+  // Only the most recent assistant "answer" bubble should offer "Explain simpler",
+  // since the backend simplifies the LAST answer in the session, not an arbitrary one.
+  document.querySelectorAll(".explain-simpler-btn").forEach(btn => btn.remove());
+  lastAnswerBubbleEl = newBubbleHandle;
+}
+
+function addAnswerActions(handle, fullText) {
+  const actions = handle.getActionsRow();
+
+  const copyBtn = document.createElement("button");
+  copyBtn.textContent = "\u2398 " + t("copyAnswer");
+  copyBtn.onclick = () => {
+    navigator.clipboard.writeText(fullText).then(() => showToast(t("copied")));
+  };
+  actions.appendChild(copyBtn);
+
+  const simplifyBtn = document.createElement("button");
+  simplifyBtn.className = "explain-simpler-btn";
+  simplifyBtn.textContent = "\u25CE " + t("explainSimpler");
+  simplifyBtn.onclick = () => runSimplify(simplifyBtn);
+  actions.appendChild(simplifyBtn);
+
+  refreshSimplifyButtonsScope(handle);
+}
+
+function renderOptions(handle, options) {
+  if (!options || !options.length) return;
+  const wrap = handle.getOptionsWrap();
+
+  options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "option-btn";
+    btn.textContent = opt;
+    btn.onclick = () => { clearOptionsUI(handle); submitMessage(opt); };
+    wrap.appendChild(btn);
+  });
+
+  const customBtn = document.createElement("button");
+  customBtn.className = "option-btn custom";
+  customBtn.textContent = t("customAnswerOpt");
+  const customRow = document.createElement("div");
+  customRow.className = "custom-answer-row";
+  const customInput = document.createElement("input");
+  customInput.type = "text";
+  customInput.placeholder = t("customAnswerPlaceholder");
+  const customSubmit = document.createElement("button");
+  customSubmit.textContent = t("customAnswerSend");
+  customSubmit.onclick = () => {
+    const val = customInput.value.trim();
+    if (!val) return;
+    clearOptionsUI(handle);
+    submitMessage(val);
+  };
+  customInput.addEventListener("keydown", e => { if (e.key === "Enter") customSubmit.onclick(); });
+  customBtn.onclick = () => customRow.classList.toggle("active");
+  customRow.appendChild(customInput);
+  customRow.appendChild(customSubmit);
+
+  wrap.appendChild(customBtn);
+  wrap.parentElement.appendChild(customRow);
+}
+
+function clearOptionsUI(handle) {
+  handle.getOptionsWrap().innerHTML = "";
+  const customRow = handle.row.querySelector(".custom-answer-row");
+  if (customRow) customRow.remove();
+}
+
+function renderFollowupButtons(handle, options) {
+  if (!options || !options.length) return;
+  const wrap = handle.getOptionsWrap();
+  wrap.className = "follow-up-options";
+  wrap.innerHTML = "";
+
+  const heading = document.createElement("div");
+  heading.className = "follow-up-heading";
+  heading.textContent = t("followUpHeading");
+  wrap.appendChild(heading);
+
+  const btnsWrap = document.createElement("div");
+  btnsWrap.className = "follow-up-btns";
+  options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "option-btn";
+    btn.textContent = opt;
+    btn.onclick = () => { wrap.innerHTML = ""; submitMessage(opt); };
+    btnsWrap.appendChild(btn);
+  });
+  wrap.appendChild(btnsWrap);
+}
+
+function stripFollowupSection(text) {
+  if (!text) return "";
+  const regex = /(?:\n+|^)(?:#{1,6}\s*|\*\*|\*|\b)(?:What you might want to ask next|What you might ask next|Follow-up questions|Recommended questions|Next steps)[:\s\*\#]*/i;
+  const match = text.match(regex);
+  if (match) {
+    return text.substring(0, match.index).trim();
+  }
+  return text;
+}
+
+/* ============================== SSE streaming helper ============================== */
+async function streamSSE(url, body, onEvent) {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok || !res.body) throw new Error("Request failed: " + res.status);
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const parts = buffer.split("\n\n");
+    buffer = parts.pop();
+    for (const part of parts) {
+      const line = part.trim();
+      if (!line.startsWith("data:")) continue;
+      const jsonStr = line.slice(5).trim();
+      if (!jsonStr) continue;
+      try { onEvent(JSON.parse(jsonStr)); } catch (e) { /* ignore malformed chunk */ }
+    }
+  }
+}
+
+/* ============================== Send / receive ============================== */
+async function submitMessage(text) {
+  appendUserMessage(text);
+  await runChatStream(text);
+}
+
+async function sendMessage() {
+  const input = document.getElementById("msgInput");
+  const message = input.value.trim();
+  if (!message || isStreaming) return;
+  input.value = "";
+  autoGrow(input);
+  await submitMessage(message);
+}
+
+async function runChatStream(message) {
+  isStreaming = true;
+  document.getElementById("sendBtn").disabled = true;
+  let handle = appendStreamingBubble("assistant", null);
+  handle.setStatusText("🔍 " + t("searchingLocal"));
+
+  try {
+    await streamSSE(`${API}/chat/stream`, { session_id: sessionId, message, language: currentLang, web_search: isWebSearchOn }, (evt) => {
+      if (evt.event === "status") {
+        if (evt.status === "searching_web") {
+          handle.setStatusText("🌐 " + t("searchingWeb"));
+        } else if (evt.status === "searching_local") {
+          handle.setStatusText("🔍 " + t("searchingLocal"));
+        }
+      } else if (evt.event === "start") {
+        sessionId = evt.session_id;
+        localStorage.setItem("nyaya_session", sessionId);
+        handle._usedWebFallback = evt.used_web_fallback;
+        loadPastMatters();
+      } else if (evt.event === "token") {
+        handle.appendToken(evt.text);
+      } else if (evt.event === "done") {
+        const fullText = handle.finish();
+        if (evt.type === "clarify") {
+          handle.row.classList.remove("assistant");
+          handle.row.classList.add("clarify");
+          renderOptions(handle, evt.options);
+        } else {
+          renderCitations(handle.getBadgeRow(), evt.citations, handle._usedWebFallback);
+          if (evt.options && evt.options.length) {
+            const cleanText = stripFollowupSection(fullText);
+            if (cleanText.length < fullText.length) handle.rerender(cleanText);
+            renderFollowupButtons(handle, evt.options);
+          }
+          addAnswerActions(handle, fullText);
+        }
+        loadPastMatters();
+      }
+    });
+  } catch (e) {
+    if (handle) {
+      handle.appendToken("\n\n*(Connection error — is the backend running at " + API + "?)*");
+      handle.finish();
+    } else {
+      showToast("Could not reach the backend.");
+    }
+  } finally {
+    isStreaming = false;
+    document.getElementById("sendBtn").disabled = false;
+  }
+}
+
+async function runSimplify(triggerBtn) {
+  if (!sessionId || isStreaming) return;
+  isStreaming = true;
+  triggerBtn.disabled = true;
+  triggerBtn.textContent = "\u25CE " + t("explaining");
+
+  let handle = null;
+  try {
+    await streamSSE(`${API}/simplify/stream`, { session_id: sessionId }, (evt) => {
+      if (evt.event === "start") {
+        handle = appendStreamingBubble("assistant", "simplified");
+      } else if (evt.event === "token") {
+        handle.appendToken(evt.text);
+      } else if (evt.event === "done") {
+        handle.finish();
+        const badge = document.createElement("span");
+        badge.className = "tag simplified-tag";
+        badge.textContent = "\u25CE " + t("simplifiedBadge");
+        handle.getBadgeRow().appendChild(badge);
+      }
+    });
+  } catch (e) {
+    showToast("Could not reach the backend.");
+  } finally {
+    isStreaming = false;
+    triggerBtn.disabled = false;
+    triggerBtn.textContent = "\u25CE " + t("explainSimpler");
+  }
+}
+
+/* ============================== Composer UX ============================== */
+function autoGrow(el) {
+  el.style.height = "auto";
+  el.style.height = Math.min(el.scrollHeight, 140) + "px";
+}
+document.getElementById("msgInput").addEventListener("input", (e) => autoGrow(e.target));
+document.getElementById("msgInput").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+/* ============================== Voice input ============================== */
+const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognizer = null;
+let recording = false;
+
+function toggleVoiceInput() {
+  const micBtn = document.getElementById("micBtn");
+  if (!SpeechRecognitionCtor) { showToast(t("voiceUnsupported")); return; }
+
+  if (recording) {
+    recognizer && recognizer.stop();
+    return;
+  }
+
+  recognizer = new SpeechRecognitionCtor();
+  recognizer.lang = currentLang === "hi" ? "hi-IN" : "en-IN";
+  recognizer.interimResults = true;
+  recognizer.continuous = false;
+
+  const input = document.getElementById("msgInput");
+  const baseText = input.value ? input.value + " " : "";
+
+  recognizer.onstart = () => {
+    recording = true;
+    micBtn.classList.add("recording");
+    showToast(t("voiceListening"));
+  };
+  recognizer.onresult = (event) => {
+    let transcript = "";
+    for (let i = 0; i < event.results.length; i++) transcript += event.results[i][0].transcript;
+    input.value = baseText + transcript;
+    autoGrow(input);
+  };
+  recognizer.onerror = () => { recording = false; micBtn.classList.remove("recording"); };
+  recognizer.onend = () => { recording = false; micBtn.classList.remove("recording"); };
+
+  recognizer.start();
+}
+
+/* ============================== Upload / Draft ============================== */
+async function uploadFile() {
+  if (!sessionId) { showToast(t("uploadNoSession")); return; }
+  const fileInput = document.getElementById("fileInput");
+  if (!fileInput.files.length) return;
+  const docRole = document.getElementById("docRole").value;
+
+  const form = new FormData();
+  form.append("session_id", sessionId);
+  form.append("doc_role", docRole);
+  form.append("file", fileInput.files[0]);
+
+  try {
+    const res = await fetch(`${API}/upload`, { method: "POST", body: form });
+    const data = await res.json();
+    hideEmptyState();
+    const chat = document.getElementById("chat");
+    const row = document.createElement("div");
+    row.className = "msg-row assistant";
+    const tierNote = data.verdict ? ` — ${data.verdict.verdict}` : "";
+    row.innerHTML = `<div class="avatar assist-av">NS</div><div class="bubble">${renderMarkdown("**" + t("docUploaded") + tierNote + "**")}</div>`;
+    chat.appendChild(row);
+    scrollChatToBottom();
+    fileInput.value = "";
+  } catch (e) {
+    showToast("Upload failed — is the backend running?");
+  }
+}
+
+function onDraftTypeChange() {
+  const type = document.getElementById("draftType").value;
+  document.getElementById("draftSubjectRow").style.display = type === "complaint" ? "flex" : "none";
+  document.getElementById("draftTargetLabel").textContent = type === "complaint"
+    ? t("draftTargetLabel") : t("draftTargetLabel");
+}
+
+let lastDraftText = "";
+async function draftDoc() {
+  if (!sessionId) { showToast(t("draftNoSession")); return; }
+  const doc_type = document.getElementById("draftType").value;
+  const department_or_recipient = document.getElementById("draftTarget").value;
+  const subject = document.getElementById("draftSubject").value;
+
+  try {
+    const res = await fetch(`${API}/draft`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId, doc_type, department_or_recipient, subject }),
+    });
+    const data = await res.json();
+    lastDraftText = data.text;
+    const out = document.getElementById("draftOutput");
+    document.getElementById("draftOutputWrap").style.display = "block";
+    out.textContent = data.text;
+  } catch (e) {
+    showToast("Draft generation failed — is the backend running?");
+  }
+}
+
+function copyDraft() {
+  if (!lastDraftText) return;
+  navigator.clipboard.writeText(lastDraftText).then(() => showToast(t("copied")));
+}
+
+function downloadDraft() {
+  if (!lastDraftText) return;
+  const blob = new Blob([lastDraftText], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "nyaya-sahayak-draft.txt";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ============================== Past Matters Management ============================== */
+async function loadPastMatters() {
+  const container = document.getElementById("pastMattersList");
+  if (!container) return;
+  try {
+    const res = await fetch(`${API}/sessions`);
+    const sessions = await res.json();
+    if (!sessions || !sessions.length) {
+      container.innerHTML = `<p class="muted-text" style="font-size:11px; color:var(--muted); margin:0;" data-i18n="noPastMatters">${t("noPastMatters")}</p>`;
+      return;
+    }
+    container.innerHTML = "";
+    sessions.forEach(s => {
+      const item = document.createElement("div");
+      item.className = "past-matter-item" + (s.id === sessionId ? " active" : "");
+
+      const titleSpan = document.createElement("span");
+      titleSpan.className = "past-matter-title";
+      titleSpan.textContent = s.title || "Untitled Matter";
+      titleSpan.title = s.title || "";
+      titleSpan.onclick = () => loadSession(s.id);
+
+      const delBtn = document.createElement("button");
+      delBtn.className = "past-matter-del";
+      delBtn.innerHTML = "&times;";
+      delBtn.title = "Delete matter";
+      delBtn.onclick = (e) => {
+        e.stopPropagation();
+        deleteMatter(s.id);
+      };
+
+      item.appendChild(titleSpan);
+      item.appendChild(delBtn);
+      container.appendChild(item);
+    });
+  } catch (e) {
+    // backend offline or empty
+  }
+}
+
+async function loadSession(id) {
+  if (isStreaming) return;
+  sessionId = id;
+  localStorage.setItem("nyaya_session", id);
+
+  const chat = document.getElementById("chat");
+  chat.innerHTML = "";
+
+  try {
+    const res = await fetch(`${API}/session/${id}`);
+    if (!res.ok) throw new Error("Failed to load session");
+    const data = await res.json();
+
+    if (!data.messages || !data.messages.length) {
+      chat.innerHTML = `
+        <div class="empty-state" id="emptyState">
+          <div class="seal-big">NS</div>
+          <h3 data-i18n="emptyTitle">${t("emptyTitle")}</h3>
+          <p data-i18n="emptyDesc">${t("emptyDesc")}</p>
+        </div>`;
+    } else {
+      data.messages.forEach(m => {
+        if (m.role === "user") {
+          appendUserMessage(m.content);
+        } else if (m.role === "assistant") {
+          const handle = appendStreamingBubble("assistant", null);
+          if (m.options && m.options.length) {
+            const cleanText = stripFollowupSection(m.content);
+            handle.appendToken(cleanText);
+            handle.finish();
+            renderCitations(handle.getBadgeRow(), m.citations, m.used_web_fallback);
+            renderFollowupButtons(handle, m.options);
+            addAnswerActions(handle, m.content);
+          } else {
+            handle.appendToken(m.content);
+            handle.finish();
+            renderCitations(handle.getBadgeRow(), m.citations, m.used_web_fallback);
+            addAnswerActions(handle, m.content);
+          }
+        } else if (m.role === "clarify") {
+          const handle = appendStreamingBubble("clarify", null);
+          handle.appendToken(m.content);
+          handle.finish();
+          renderOptions(handle, m.options);
+        }
+      });
+    }
+    loadPastMatters();
+  } catch (e) {
+    showToast("Could not load session.");
+  }
+}
+
+async function deleteMatter(id) {
+  if (!confirm(t("deleteMatterConfirm"))) return;
+  try {
+    await fetch(`${API}/session/${id}`, { method: "DELETE" });
+    if (sessionId === id) {
+      sessionId = null;
+      localStorage.removeItem("nyaya_session");
+      document.getElementById("chat").innerHTML = `
+        <div class="empty-state" id="emptyState">
+          <div class="seal-big">NS</div>
+          <h3 data-i18n="emptyTitle">${t("emptyTitle")}</h3>
+          <p data-i18n="emptyDesc">${t("emptyDesc")}</p>
+        </div>`;
+    }
+    loadPastMatters();
+  } catch (e) {
+    showToast("Failed to delete matter.");
+  }
+}
+
+/* ============================== New matter ============================== */
+function startNewMatter() {
+  if (!confirm(t("newMatterConfirm"))) return;
+  sessionId = null;
+  localStorage.removeItem("nyaya_session");
+  document.getElementById("chat").innerHTML = `
+    <div class="empty-state" id="emptyState">
+      <div class="seal-big">NS</div>
+      <h3 data-i18n="emptyTitle">${t("emptyTitle")}</h3>
+      <p data-i18n="emptyDesc">${t("emptyDesc")}</p>
+    </div>`;
+  document.getElementById("draftOutputWrap").style.display = "none";
+  applyI18n();
+  loadPastMatters();
+}
+
+/* ============================== Tooltip touch support ============================== */
+document.querySelectorAll("[data-tooltip], .tip-icon").forEach(el => {
+  el.addEventListener("click", (e) => {
+    if (window.matchMedia("(hover: none)").matches) {
+      e.stopPropagation();
+      document.querySelectorAll(".tip-open").forEach(o => { if (o !== el) o.classList.remove("tip-open"); });
+      el.classList.toggle("tip-open");
+    }
+  });
+});
+document.addEventListener("click", () => {
+  document.querySelectorAll(".tip-open").forEach(o => o.classList.remove("tip-open"));
+});
+
+/* ============================== Init ============================== */
+setLanguage(currentLang);
+checkHealth();
+onDraftTypeChange();
+if (sessionId) {
+  loadSession(sessionId);
+} else {
+  loadPastMatters();
+}
+</script>
+
+</body>
+</html>

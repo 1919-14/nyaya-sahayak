@@ -1,0 +1,36 @@
+DOMAIN: Welfare Scheme Eligibility
+SOURCE: Ayushman Bharat — Pradhan Mantri Jan Arogya Yojana (PM-JAY), illustrative summary
+
+Overview.
+PM-JAY provides a health cover of Rs. 5 lakh per family per year for secondary and tertiary
+care hospitalization, to families identified based on deprivation and occupational criteria
+from the Socio-Economic Caste Census (SECC) database.
+
+Eligibility criteria (rural).
+Households with no adult member between ages 16 and 59, households with no able-bodied adult
+member, households with a disabled member and no able-bodied adult, landless households
+deriving income from manual casual labour, and certain other deprivation categories are
+automatically eligible, subject to SECC records.
+
+Eligibility criteria (urban).
+Occupational categories such as rag pickers, domestic workers, street vendors, construction
+workers, sanitation workers, and similar informal-sector occupations are covered.
+
+How to check eligibility.
+Eligibility can be checked using the beneficiary's ration card number, mobile number, or
+Aadhaar-linked details on the official PM-JAY portal or through empanelled hospitals'
+Ayushman Mitra desks.
+
+What is covered.
+Coverage includes pre and post hospitalization expenses, medicines, diagnostics, and
+transportation, at any empanelled public or private hospital, cashless and paperless.
+
+Common reasons for rejection or gaps.
+Name not appearing in SECC database, incorrect or mismatched Aadhaar/ration card details, or
+residing in a state that has not fully rolled out the scheme in partnership with the central
+government are common reasons a person may not find themselves covered, even if they meet the
+general deprivation criteria.
+
+Practical note.
+Applicants facing rejection despite apparent eligibility can raise a grievance through the
+PM-JAY grievance portal, or approach the District Grievance Nodal Officer.
