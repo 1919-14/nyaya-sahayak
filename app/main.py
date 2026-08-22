@@ -16,6 +16,7 @@ Endpoints:
 import io
 import json
 import uuid
+from pathlib import Path
 
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -49,13 +50,16 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
-LANDING_DIR = Path(__file__).resolve().parent.parent / "landing"
-if LANDING_DIR.exists():
-    app.mount("/landing", StaticFiles(directory=LANDING_DIR, html=True), name="landing")
-
 
 @app.get("/")
-def serve_index():
+def serve_landing():
+    """Landing / overview page — entry point for visitors."""
+    return FileResponse("landing/index.html")
+
+
+@app.get("/app")
+def serve_app():
+    """Consultation-room chat interface."""
     return FileResponse("frontend/index.html")
 
 
