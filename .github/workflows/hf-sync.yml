@@ -22,4 +22,4 @@ jobs:
           git config --global user.email "ci@github-actions"
           git config --global user.name "GitHub Actions"
           # Push this repo to the HF Space (Docker SDK space)
-          git push https://HF_USER:${HF_TOKEN}@huggingface.co/spaces/HF_USER/nyaya-sahayak main --force
+          git push https://vssksn:${HF_TOKEN}@huggingface.co/spaces/HF_USER/nyaya-sahayak main --force
