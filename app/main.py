@@ -49,6 +49,8 @@ app.add_middleware(
 )
 
 app.mount("/static", StaticFiles(directory="frontend"), name="static")
+app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend_mount")
+app.mount("/landing", StaticFiles(directory="landing", html=True), name="landing_mount")
 
 
 @app.get("/")
