@@ -49,6 +49,10 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory="frontend"), name="static")
 
+LANDING_DIR = Path(__file__).resolve().parent.parent / "landing"
+if LANDING_DIR.exists():
+    app.mount("/landing", StaticFiles(directory=LANDING_DIR, html=True), name="landing")
+
 
 @app.get("/")
 def serve_index():
