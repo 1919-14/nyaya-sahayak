@@ -1,3 +1,22 @@
+---
+title: Nyaya Sahayak
+emoji: ⚖️
+colorFrom: indigo
+colorTo: blue
+sdk: docker
+app_port: 7860
+license: mit
+pinned: true
+short_description: AI-powered civic & legal empowerment assistant for India
+tags:
+  - legal-ai
+  - rag
+  - india
+  - fastapi
+  - chromadb
+  - hackathon
+---
+
 # Nyaya Sahayak (न्याय सहायक) — AI for Civic & Legal Empowerment
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/)
