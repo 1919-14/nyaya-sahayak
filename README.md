@@ -32,9 +32,9 @@ tags:
 
 | Requirement | Details / Link |
 | :--- | :--- |
-| 🌐 **Live / Hosted Prototype Link** | [https://nyaya-sahayak-zsob.onrender.com/](https://nyaya-sahayak-zsob.onrender.com/) *(Live Deployment)* |
+| 🌐 **Live / Hosted Prototype Link** | [https://huggingface.co/spaces/vssksn/nyaya-sahayak](https://huggingface.co/spaces/vssksn/nyaya-sahayak) *(Hugging Face Space)* |
 | 📁 **GitHub Repository** | [https://github.com/1919-14/nyaya-sahayak](https://github.com/1919-14/nyaya-sahayak) |
-| 🎥 **Demo Video (MANDATORY)** | **[Click Here to Watch Demo Video (Max 10 Mins)](https://github.com/1919-14/nyaya-sahayak)** |
+| 🎥 **Demo Video (MANDATORY)** | **[Click Here to Watch Demo Video (YouTube)](https://youtu.be/IiC4twPsAc0)** |
 
 ---
 
@@ -190,14 +190,36 @@ Open your browser and navigate to:
 
 ---
 
-## ☁️ Free Cloud Deployment Guide (Render / Koyeb)
+## ☁️ Free Cloud Deployment Guide
 
-Since FastAPI is configured to serve the static frontend directly at `/`, you can host the entire application on **Render (Free Tier)** with a single Web Service:
+### Option A: Hugging Face Spaces (Docker SDK — Recommended 24/7 Free Hosting)
+Nyaya Sahayak is packaged with a custom [`Dockerfile`](file:///c:/Users/saina/Videos/nyaya-sahayak/Dockerfile) and automated GitHub Action workflow ([`.github/workflows/hf-sync.yml`](file:///c:/Users/saina/Videos/nyaya-sahayak/.github/workflows/hf-sync.yml)) to deploy seamlessly on Hugging Face Spaces:
 
-1. Create a **New Web Service** on Render connected to your GitHub repository.
+1. **Create a Docker Space on Hugging Face**:
+   * Go to [huggingface.co/new-space](https://huggingface.co/new-space).
+   * Name your Space (e.g. `nyaya-sahayak`).
+   * Select **Docker** as the Space SDK (Blank template).
+2. **Add Environment Variables / Secrets**:
+   * Under Space **Settings → Variables and Secrets**, add:
+     * `LLM_API_KEY`: Your Groq / OpenAI API key
+     * `LLM_BASE_URL`: `https://api.groq.com/openai/v1`
+     * `LLM_MODEL`: `llama-3.3-70b-versatile`
+     * `TAVILY_API_KEY`: Your Tavily API key
+3. **Automate CI/CD via GitHub Actions**:
+   * Create a Hugging Face Access Token with **Write** permission at [huggingface.co/settings/tokens](https://huggingface.co/settings/tokens).
+   * In your GitHub Repository, go to **Settings → Secrets and variables → Actions → New repository secret**:
+     * Name: `HF_TOKEN`
+     * Value: *(your HF write token)*
+   * Every push to `main` will automatically push to your Hugging Face Space!
+
+---
+
+### Option B: Render / Koyeb Web Service
+
+1. Connect your GitHub repository to **Render** or **Koyeb**.
 2. **Build Command**: `bash build.sh`
 3. **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-4. Add `LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`, and `TAVILY_API_KEY` under **Environment Variables**.
+4. Configure environment variables (`LLM_API_KEY`, `LLM_BASE_URL`, `LLM_MODEL`, `TAVILY_API_KEY`).
 
 ---
 
